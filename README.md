@@ -6,13 +6,20 @@
 [![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+## 🌐 Live Demo
+Access the live API documentation here:
+
+[https://finance-tracking-backend.onrender.com/docs](https://finance-tracking-backend.onrender.com/docs)
+
 ---
 
 ## 📋 Table of Contents
 
+- [Live Demo](#-live-demo)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
 - [Quick Start](#-quick-start)
+- [Render Deployment](#-render-deployment)
 - [API Documentation](#-api-documentation)
 - [Role-Based Access Control](#-role-based-access-control)
 - [API Endpoints](#-api-endpoints)
@@ -152,9 +159,8 @@ cd finance_system/
 pip install -r requirements.txt
 ```
 
-### 2. Run the Application
+### 2. Run the Application Locally
 ```bash
-# Start the development server
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
@@ -168,6 +174,64 @@ uvicorn main:app --reload --host 0.0.0.0 --port 8000
 2. Use seed credentials to login
 3. Click "Authorize" and paste the JWT token
 4. Explore all endpoints interactively
+
+---
+
+## ☁️ Render Deployment
+
+This project is ready to deploy on Render.
+
+### Required files
+- `requirements.txt`
+- `start.sh`
+- `runtime.txt`
+
+### start.sh content
+```bash
+#!/bin/bash
+uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+### runtime.txt content
+```text
+python-3.13.0
+```
+
+### Build and start commands for Render
+- **Build Command:** `pip install -r requirements.txt`
+- **Start Command:** `bash start.sh`
+
+### Environment variables in Render
+Add these values under the Render Web Service "Environment" section:
+- `SECRET_KEY` = a secure random JWT secret
+- `ALGORITHM` = `HS256`
+- `ACCESS_TOKEN_EXPIRE_MINUTES` = `30`
+- `DATABASE_URL` = `sqlite:///./finance.db` (or use PostgreSQL for production)
+
+### GitHub preparation
+```bash
+git add .
+git commit -m "deployment setup"
+git push origin main
+```
+
+### Deploying on Render
+1. Go to [render.com](https://render.com) and create a new Web Service.
+2. Connect your GitHub repo.
+3. Use the following values:
+   - Name: `finance-tracking-backend`
+   - Runtime: `Python`
+   - Build Command: `pip install -r requirements.txt`
+   - Start Command: `bash start.sh`
+4. Add the required environment variables.
+5. Click **Manual Deploy** to deploy the latest commit.
+
+### Verify deployment
+- Open: `https://finance-tracking-backend.onrender.com/docs`
+- Expected result: FastAPI Swagger UI should appear
+
+### Important production note
+This repo uses SQLite by default. On Render, SQLite file storage is ephemeral and may reset after deployments. For production, use PostgreSQL and set `DATABASE_URL` to the Render PostgreSQL URL.
 
 ---
 
@@ -550,6 +614,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ---
 
 **Built with ❤️ for demonstrating enterprise-grade Python backend development**
-# finance-tracking-backend
-# finance-tracking-backend
 # finance-tracking-backend
