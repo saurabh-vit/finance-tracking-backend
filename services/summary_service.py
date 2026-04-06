@@ -9,7 +9,7 @@ from typing import Optional
 from sqlalchemy import func, extract
 from sqlalchemy.orm import Session
 
-from finance_system.models.transaction import Transaction
+from models.transaction import Transaction
 
 
 def get_overview(db: Session, user_id: int, is_admin: bool) -> dict:

@@ -8,16 +8,16 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from finance_system.dependencies import get_db, get_current_user, require_role
-from finance_system.models.transaction import Transaction
-from finance_system.models.user import User
-from finance_system.schemas.transaction import (
+from dependencies import get_db, get_current_user, require_role
+from models.transaction import Transaction
+from models.user import User
+from schemas.transaction import (
     TransactionResponse,
     OverviewResponse,
     ByCategoryResponse,
     MonthlyResponse,
 )
-from finance_system.services import summary_service
+from services import summary_service
 
 router = APIRouter(prefix="/summary", tags=["Summary"])
 

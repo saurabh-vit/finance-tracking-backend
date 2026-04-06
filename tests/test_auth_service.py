@@ -3,7 +3,12 @@ Unit tests for auth_service.
 """
 
 import pytest
-from finance_system.services.auth_service import hash_password, verify_password, create_access_token, decode_token
+from services.auth_service import (
+    create_access_token,
+    decode_token,
+    hash_password,
+    verify_password,
+)
 
 
 def test_hash_password():

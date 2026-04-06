@@ -6,12 +6,19 @@ All ORM models must inherit from Base defined here.
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase
 
-from finance_system.config import settings
+from config import settings
 
-engine = create_engine(
-    settings.database_url,
-    connect_args={"check_same_thread": False},  # Required for SQLite with FastAPI
-)
+
+database_url = settings.database_url
+if database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
+
+engine_kwargs = {"pool_pre_ping": True}
+if database_url.startswith("sqlite"):
+    # SQLite needs this flag when accessed from FastAPI request threads.
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+
+engine = create_engine(database_url, **engine_kwargs)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

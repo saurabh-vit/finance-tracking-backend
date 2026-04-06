@@ -4,7 +4,7 @@ Unit tests for summary_service.
 
 from datetime import date
 from unittest.mock import Mock
-from finance_system.services.summary_service import get_overview
+from services.summary_service import get_overview
 
 
 def test_get_overview():

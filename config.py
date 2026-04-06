@@ -3,7 +3,7 @@ Application configuration settings.
 All sensitive values are loaded from environment variables for security.
 """
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -18,14 +18,15 @@ class Settings(BaseSettings):
 
     # Database Configuration
     database_url: str = "sqlite:///./finance.db"
+    seed_demo_data: bool = False
+    bootstrap_admin_username: str | None = None
+    bootstrap_admin_email: str | None = None
+    bootstrap_admin_password: str | None = None
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-
-
-# Instantiate settings to be imported by other modules
-settings = Settings()
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
 
 
 # Global settings instance

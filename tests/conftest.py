@@ -5,8 +5,8 @@ Test configuration and fixtures.
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from finance_system.database import Base
-from finance_system.config import settings
+from config import settings
+from database import Base
 
 
 @pytest.fixture(scope="session")

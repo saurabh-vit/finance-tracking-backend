@@ -7,9 +7,9 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from finance_system.dependencies import get_db, require_role
-from finance_system.models.user import User
-from finance_system.schemas.user import UserResponse, UserUpdate
+from dependencies import get_db, require_role
+from models.user import User
+from schemas.user import UserResponse, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["Users"])
 

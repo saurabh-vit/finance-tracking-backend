@@ -10,10 +10,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from finance_system.dependencies import get_db, rate_limit_login
-from finance_system.models.user import User
-from finance_system.schemas.user import Token, UserCreate, UserResponse
-from finance_system.services.auth_service import (
+from dependencies import get_db, rate_limit_login
+from models.user import User
+from schemas.user import Token, UserCreate, UserResponse
+from services.auth_service import (
     create_access_token,
     hash_password,
     verify_password,

@@ -9,18 +9,19 @@ Responsibilities:
 """
 
 import logging
+import os
 from contextlib import asynccontextmanager
 from datetime import date
 
 from fastapi import FastAPI
 from sqlalchemy.orm import Session
 
-from finance_system.database import engine, SessionLocal
-from finance_system.models import User, Transaction  # registers all ORM models with Base
-from finance_system.database import Base
-from finance_system.services.auth_service import hash_password
-from finance_system.routers import auth, transactions, summary, users
-from finance_system.schemas.transaction import HealthResponse
+from config import settings
+from database import Base, SessionLocal, engine
+from models import Transaction, User  # registers all ORM models with Base
+from routers import auth, summary, transactions, users
+from schemas.transaction import HealthResponse
+from services.auth_service import hash_password
 
 
 # ---------------------------------------------------------------------------
@@ -31,12 +32,30 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.StreamHandler(),  # Console output
-        logging.FileHandler("finance_system.log"),  # File output
+        logging.StreamHandler(),  # Console output for local and Render logs
+        *([] if os.getenv("RENDER") else [logging.FileHandler("finance_system.log")]),
     ],
 )
 
 logger = logging.getLogger(__name__)
+
+_APP_DESCRIPTION = (
+    "REST API for managing personal financial records.\n\n"
+    "## Quick Start\n"
+    "1. **Login** via `POST /auth/login`.\n"
+    "2. Click **Authorize** (top-right) and paste your token.\n"
+    "3. Explore the endpoints!\n"
+)
+
+if settings.seed_demo_data:
+    _APP_DESCRIPTION += (
+        "\n### Seed credentials\n"
+        "| Username | Password | Role |\n"
+        "|---|---|---|\n"
+        "| admin_user | admin123 | admin |\n"
+        "| analyst_user | analyst123 | analyst |\n"
+        "| viewer_user | viewer123 | viewer |"
+    )
 
 _SEED_USERS = [
     {"username": "admin_user",   "email": "admin@finance.io",   "password": "admin123",   "role": "admin"},
@@ -62,6 +81,36 @@ _SEED_TRANSACTIONS = [
     {"amount": 2800.0,  "type": "expense", "category": "health",        "date": date(2025, 3, 10), "notes": "Gym membership + medicines"},
     {"amount": 45000.0, "type": "income",  "category": "salary",        "date": date(2024, 12, 1), "notes": "December 2024 salary"},
 ]
+
+
+def _bootstrap_admin(db: Session) -> None:
+    """Create the first admin user from env vars when the DB is empty."""
+    if db.query(User).count() > 0:
+        return
+
+    username = settings.bootstrap_admin_username
+    email = settings.bootstrap_admin_email
+    password = settings.bootstrap_admin_password
+
+    if not any([username, email, password]):
+        return
+
+    if not all([username, email, password]):
+        logger.warning(
+            "Bootstrap admin skipped because BOOTSTRAP_ADMIN_USERNAME, "
+            "BOOTSTRAP_ADMIN_EMAIL, and BOOTSTRAP_ADMIN_PASSWORD must all be set."
+        )
+        return
+
+    admin = User(
+        username=username,
+        email=email,
+        hashed_password=hash_password(password),
+        role="admin",
+    )
+    db.add(admin)
+    db.commit()
+    logger.info("Bootstrap admin user created.")
 
 
 def _seed_database(db: Session) -> None:
@@ -97,7 +146,7 @@ def _seed_database(db: Session) -> None:
         db.add(txn)
 
     db.commit()
-    print("✅  Database seeded with default users and sample transactions.")
+    logger.info("Database seeded with default users and sample transactions.")
 
 
 # ---------------------------------------------------------------------------
@@ -110,7 +159,11 @@ async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
-        _seed_database(db)
+        _bootstrap_admin(db)
+        if settings.seed_demo_data:
+            _seed_database(db)
+        else:
+            logger.info("Skipping demo data seed. Set SEED_DEMO_DATA=true to enable it.")
     finally:
         db.close()
     yield
@@ -123,19 +176,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Finance Tracking System",
-    description=(
-        "REST API for managing personal financial records.\n\n"
-        "## Quick Start\n"
-        "1. **Login** via `POST /auth/login` with one of the seed users.\n"
-        "2. Click **Authorize** (top-right) and paste your token.\n"
-        "3. Explore the endpoints!\n\n"
-        "### Seed credentials\n"
-        "| Username | Password | Role |\n"
-        "|---|---|---|\n"
-        "| admin_user | admin123 | admin |\n"
-        "| analyst_user | analyst123 | analyst |\n"
-        "| viewer_user | viewer123 | viewer |"
-    ),
+    description=_APP_DESCRIPTION,
     version="1.0.0",
     lifespan=lifespan,
 )

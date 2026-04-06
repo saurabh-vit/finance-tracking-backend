@@ -6,7 +6,7 @@ from datetime import date, datetime, timezone
 from sqlalchemy import Integer, Float, String, Date, DateTime, ForeignKey, Index
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from finance_system.database import Base
+from database import Base
 
 
 class Transaction(Base):

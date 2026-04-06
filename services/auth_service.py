@@ -12,7 +12,7 @@ from typing import Any
 import bcrypt
 from jose import JWTError, jwt
 
-from finance_system.config import settings
+from config import settings
 
 logger = logging.getLogger(__name__)
 

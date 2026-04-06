@@ -15,9 +15,9 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError
 from sqlalchemy.orm import Session
 
-from finance_system.database import SessionLocal
-from finance_system.models.user import User
-from finance_system.services.auth_service import decode_token
+from database import SessionLocal
+from models.user import User
+from services.auth_service import decode_token
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
